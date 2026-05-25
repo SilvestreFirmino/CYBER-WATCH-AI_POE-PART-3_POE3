@@ -101,5 +101,8 @@
   <ItemGroup>
     <Resource Include="eyelogo2.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="pattern.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

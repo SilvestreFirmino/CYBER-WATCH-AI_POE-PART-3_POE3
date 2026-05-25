@@ -79,10 +79,35 @@
     <!-- Root Grid -->
     <Grid>
 
-      
-        <Grid x:Name="name_grid" Visibility="Visible" Background="#0D0D0D">
+
+        <Grid x:Name="name_grid" 
+              Visibility="Visible" 
+              Background="#0D0D0D">
+
+            <Image
+                       Source="/pattern.png" 
+                       Opacity="0.6" 
+                       Margin="80,82,610,-31"
+                       RenderTransformOrigin="0.5,0.5">
+
+                <Image.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="90.248"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </Image.RenderTransform>
+            </Image>
 
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+
+
+                <!--Adding design patterns-->
+
+                <!-- Logo with a slight drop shadow -->
+
+                <!-- Logo with a slight drop shadow -->
 
                 <!-- Logo with a slight drop shadow -->
                 <Image Width="220" Source="/eyelogo2.png" x:Name="logo" Margin="0,0,0,40">
@@ -108,6 +133,24 @@
                         Height="50" Width="320"
                         Click="submit_name"/>
             </StackPanel>
+
+            <Image
+                   Source="/pattern.png" 
+                   Opacity="0.6" 
+                   Margin="606,105,86,-12"
+                   RenderTransformOrigin="0.5,0.5">
+                <Image.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="-90.511"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </Image.RenderTransform>
+
+            </Image>
+
+
 
         </Grid>
 
