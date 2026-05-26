@@ -5,221 +5,190 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CYBER_WATCH_AI_POE_PART_2"
         mc:Ignorable="d"
-        Title="Cyber Watch AI" Height="550" Width="900"
-        WindowStartupLocation="CenterScreen"
-        Background="#0D0D0D">
-
-    <!-- ========================================== -->
-    <!-- GLOBAL UI STYLES                           -->
-    <!-- ========================================== -->
-    <Window.Resources>
-        <!-- Modern Rounded Button Style with Hover Effect -->
-        <Style x:Key="CyberButton" TargetType="Button">
-            <Setter Property="Background" Value="#C21807"/>
-            <!-- Deep Cyber Red -->
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontFamily" Value="Trebuchet MS"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="FontSize" Value="16"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" 
-                                CornerRadius="8" 
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#FF3333"/>
-                    <!-- Bright Red on Hover -->
-                </Trigger>
-                <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="#8A0F03"/>
-                    <!-- Darker on Click -->
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-        <!-- Modern Dark TextBox Style -->
-        <Style x:Key="CyberTextBox" TargetType="TextBox">
-            <Setter Property="Background" Value="#1A1A1A"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="CaretBrush" Value="Red"/>
-            <!-- Red blinking cursor -->
-            <Setter Property="FontFamily" Value="Trebuchet MS"/>
-            <Setter Property="FontSize" Value="15"/>
-            <Setter Property="Padding" Value="15,0"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
-                        <Border Background="{TemplateBinding Background}" 
-                                BorderBrush="#333333" 
-                                BorderThickness="2" 
-                                CornerRadius="8">
-                            <ScrollViewer x:Name="PART_ContentHost"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsFocused" Value="True">
-                    <Setter Property="BorderBrush" Value="#C21807"/>
-                    <!-- Red border when typing -->
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-    </Window.Resources>
-
-    <!-- Root Grid -->
+        Title="MainWindow" Height="450" Width="800">
     <Grid>
 
-
-        <Grid x:Name="name_grid" 
-              Visibility="Visible" 
-              Background="#0D0D0D">
-
-            <Image
-                       Source="/pattern.png" 
-                       Opacity="0.6" 
-                       Margin="80,82,610,-31"
-                       RenderTransformOrigin="0.5,0.5">
-
-                <Image.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform Angle="90.248"/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Image.RenderTransform>
-            </Image>
-
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+        <!-- 
+            HOME GRID
+            This grid serves as the main landing page  of the application.
+            It contains a logo for AI , a welcome message to greet users,
+            and a navigation button to proceed to the next section.
+            Currently hidden by default.
+        -->
+        <Grid x:Name="home_grid" Visibility="Hidden"
+              Background="Black">
 
 
-                <!--Adding design patterns-->
+            <!-- Logo -->
 
-                <!-- Logo with a slight drop shadow -->
-
-                <!-- Logo with a slight drop shadow -->
-
-                <!-- Logo with a slight drop shadow -->
-                <Image Width="220" Source="/eyelogo2.png" x:Name="logo" Margin="0,0,0,40">
-                    <Image.Effect>
-                        <DropShadowEffect BlurRadius="20" ShadowDepth="0" Color="Red" Opacity="0.3"/>
-                    </Image.Effect>
-                </Image>
-
-                <TextBlock Text="INITIALIZE SESSION" 
-                           Foreground="#555555" FontSize="14" FontFamily="Trebuchet MS" 
-                           HorizontalAlignment="Center" Margin="0,0,0,10" 
-                           />
-
-                <TextBox x:Name="user_name" 
-                         Style="{StaticResource CyberTextBox}"
-                         Height="50" Width="320"
-                         Text="Enter your username"
-                         Foreground="Gray"
-                         Margin="0,0,0,25"/>
-
-                <Button Content="SUBMIT" 
-                        Style="{StaticResource CyberButton}"
-                        Height="50" Width="320"
-                        Click="submit_name"/>
-            </StackPanel>
-
-            <Image
-                   Source="/pattern.png" 
-                   Opacity="0.6" 
-                   Margin="606,105,86,-12"
-                   RenderTransformOrigin="0.5,0.5">
-                <Image.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform Angle="-90.511"/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Image.RenderTransform>
-
-            </Image>
+            <Image 
+                Source="/eyelogo2.png" 
+                Height="200"
+                Width="300"
+                Margin="0,0,0,200"
+                   />
+            <!-- welcome message-->
 
 
+
+            <TextBlock
+                Text="CYBER WATCHER AI chatbot,"
+                Foreground="Red"
+                Height="38"
+                FontFamily="Trebuchet MS"
+                TextAlignment="Center"
+                Margin="0,230,0,0"
+                FontSize="26"
+                 HorizontalAlignment="Center" Width="518" VerticalAlignment="Top"
+                />
+            <TextBlock
+                Text="WELCOME TO"
+                
+                Height="38"
+                FontFamily="Trebuchet MS"
+                TextAlignment="Center"
+                Margin="0,192,0,0"
+                FontSize="18"
+                Foreground="White" HorizontalAlignment="Center" Width="518" VerticalAlignment="Top"
+                />
+            <TextBlock
+                Text="click here to continue "
+                
+                Height="38"
+                FontFamily="Trebuchet MS"
+                TextAlignment="Center"
+                Margin="0,268,0,0"
+                FontSize="18"
+                Foreground="White" HorizontalAlignment="Center" Width="518" VerticalAlignment="Top"
+                />
+
+            <!-- button to continue-->
+            <Button 
+                Background="DarkRed"
+                
+                Height="40"
+                Width="200"
+                Margin="0,200,0,0"
+                Content="ENTER"
+                FontSize="18"
+                Click="proceed"
+                Foreground="White"
+                FontFamily="Trebuchet MS"
+                />
 
         </Grid>
 
-        <!-- ========================================== -->
-        <!-- CHAT INTERFACE                             -->
-        <!-- ========================================== -->
-        <Grid x:Name="Chat_Grid" Visibility="Hidden">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="260"/>
-                <!-- Sidebar width -->
-                <ColumnDefinition Width="*"/>
-                <!-- Chat area takes remaining space -->
-            </Grid.ColumnDefinitions>
+        <!-- 
+            USERNAME GRID
+            This grid is for prompting the user for username.
+            It contains a logo for AI, a textbox for users to enter their name,
+            and a submit button to save the username.
+            Hidden .
+        -->
+        <Grid x:Name="username_grid" Visibility="Hidden" Background="Black">
 
-            <!-- SIDEBAR (Darker Background) -->
-            <Border Grid.Column="0" Background="#111111" BorderBrush="#222222" BorderThickness="0,0,1,0">
-                <StackPanel Margin="20,40,20,20">
-                    <Image Width="140" Source="/eyelogo2.png" x:Name="logo2" Margin="0,0,0,15"/>
 
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,40">
-                        <TextBlock Text="CYBER " FontFamily="Trebuchet MS" FontSize="20" FontWeight="Bold" Foreground="White"/>
-                        <TextBlock Text="WATCH " FontFamily="Trebuchet MS" FontSize="20" FontWeight="Bold" Foreground="#C21807"/>
-                        <TextBlock Text="AI" FontFamily="Trebuchet MS" FontSize="20" FontWeight="Bold" Foreground="White"/>
-                    </StackPanel>
+            <!-- Logo -->
+            <Image 
+                Source="/eyelogo2.png"
+                Margin="281,20,281,283"
+                   />
+            <TextBlock
+                     Text="CYBER WATCHER AI chatbot"
+                     Foreground="White"
+                     Height="38"
+                     FontFamily="Trebuchet MS"
+                     TextAlignment="Center"
+                     Margin="0,150,141,0"
+                     FontSize="26"
+                     HorizontalAlignment="Right" Width="518" VerticalAlignment="Top"
+    />
+            <!-- Hint message-->
+            <TextBlock
+                FontWeight="Bold"
+                Foreground="White"
+                FontSize="14"
+                Text="Enter username"
+                Height="20"
+                Width="270"
+                TextAlignment="Justify"
+                Margin="0,30,0,0"
+                FontFamily="Trebuchet MS"
+                />
 
-                    <!-- Divider Line -->
-                    <Rectangle Height="1" Fill="#222222" Margin="0,0,0,20"/>
+            <!-- Enter/Prompt username-->
+            <TextBox
+                Background="Black"
+                Foreground="White"
+                Height="40"
+                Width="270"
+                TextAlignment="Center"
+                Margin="0,100,0,0"
+                FontFamily="Trebuchet MS"
+                x:Name="usernames_input"
+                />
 
-                    <TextBlock Text="SYSTEM STATUS: ONLINE" 
-                               Foreground="#00FF41" FontSize="12" FontFamily="Trebuchet MS" FontWeight="Bold"/>
-                </StackPanel>
-            </Border>
+            <!-- error message-->
+            <TextBlock
+         Text="please enter username to continue..."
+         Height="20"
+         Width="270"
+         TextAlignment="Justify"
+         Margin="0,180,0,0"
+         Foreground="Red"
+         FontFamily="Trebuchet MS"
+         />
 
-            <!-- CHAT AREA -->
-            <Grid Grid.Column="1" Margin="30">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-
-                <!-- List view to show chats -->
-                <Border Grid.Row="0" Background="#1A1A1A" CornerRadius="10" Margin="0,0,0,20">
-                    <ListView x:Name="chats" 
-                              Background="Transparent" BorderThickness="0"
-                              FontFamily="Trebuchet MS" Foreground="White" FontSize="15"
-                              Margin="10"/>
-                </Border>
-
-                <!-- Input Area -->
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="120"/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBox x:Name="question" 
-                             Style="{StaticResource CyberTextBox}"
-                             Grid.Column="0" 
-                             Height="55"
-                             Margin="0,0,15,0"/>
-
-                    <Button Content="SEND" 
-                            Style="{StaticResource CyberButton}"
-                            Grid.Column="1" 
-                            Height="55"
-                            Click="send"/>
-                </Grid>
-            </Grid>
+            <!-- button to submit name-->
+            <Button 
+        Height="40"
+        Width="270"
+        Margin="0,250,0,0"
+        Content="CONFIRM USERNAME"
+        Click="submit_name"
+                Background="DarkRed"
+                Foreground="White"
+                FontFamily="Trebuchet MS"
+        />
 
         </Grid>
+
+        <!-- 
+            CHAT GRID
+            This grid handles all messaging and conversation-related features of the application.
+            It contains a ListView to display chat messages, a textbox for typing questions,
+            and a submit button to send the question to the chat.
+            Starting in a hidden state.
+        -->
+        <Grid x:Name="chat_grid" Visibility="Hidden">
+
+
+            <!-- List view to show messages show messages-->
+            <ListView  
+                x:Name="chats" 
+                Height="300"
+                Margin="0,0,0,120"
+                />
+
+
+            <!-- TextBox to prompt questions-->
+            <TextBox
+                x:Name="question"
+                Height="50"
+                Width="480"
+                Margin="0,300,300,0"
+                />
+
+            <!-- button to submit -->
+            <Button
+                Height="50"
+                Width="280"
+                Margin="490,300,0,0"
+                Content="send "
+                Click="send"
+                />
+
+        </Grid>
+
     </Grid>
 </Window>

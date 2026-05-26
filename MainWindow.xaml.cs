@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -9,215 +13,474 @@ using System.Windows.Media;
 
 namespace CYBER_WATCH_AI_POE_PART_2
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
+
     public partial class MainWindow : Window
-    {
-        // Creating an instance for the class Array
+    {//start of class
+
+
+        //creating an instance for the class Array
         ArrayList reply = new ArrayList();
         ArrayList ignore = new ArrayList();
+        user_name check_name = new user_name();
+
+        // variables
+        string username = string.Empty;
+        string pre_question = string.Empty;
+        int counting = 0;
+
+
 
         public MainWindow()
         {
             InitializeComponent();
 
-            // Creating an instance for the respond class to load data
             new respond(reply, ignore) { };
+
+            //creating an instance for the class voice_greeting 
+            //with an object name greet
+            voice_greeting greet = new voice_greeting();
+
+            //call the voice method
+            greet.greet();
         }
 
+
+
+
+
+
+
+
+
+
+        //proceed  event handler
+        private void proceed(object sender, RoutedEventArgs e)
+        {
+            //Hide home page grid and set Username grid visible
+            home_grid.Visibility = Visibility.Hidden;
+            username_grid.Visibility = Visibility.Visible;
+        }
+
+
+
+
+
+
+
+
+
+
+        //submit name  event handler
+        private void submit_name(object sender, RoutedEventArgs e)
+        {
+
+
+
+            //check the user name from memory recall
+            username = check_name.submit_name(usernames_input, chats);
+
+
+
+
+
+            //Hide username page grid and set chats grid visible
+            username_grid.Visibility = Visibility.Hidden;
+            chat_grid.Visibility = Visibility.Visible;
+        }
+
+
+
+
+
+
+
+
+
+
+        //send event handler
         private void send(object sender, RoutedEventArgs e)
         {
-            // Get the question from the design user input
-            string questions = question.Text.ToString();
+            // Get the question from the design and sanitize it
+            string rawQuestion = question.Text.ToString().Trim();
 
-            // If statement to check if user entered a question or not
+            if (string.IsNullOrWhiteSpace(rawQuestion))
+            {
+                error_method("ChatBot", "Please enter a question.");
+                return;
+            }
+
+            // Remove special characters and clean the question
+            string questions = RemoveSpecialCharacters(rawQuestion);
+
+            // Show what the user typed 
+            error_method(username, rawQuestion);
+
+
+            //ai chats and auto_show_interest
+            auto_show_interest();
+            ai_check(questions);
+        }
+
+        //end for the username submit
+
+
+
+        //start of ai_chat method START EDITING HERE
+        private void ai_check(string questions)
+        {
+
+
+            // Check if user entered anything meaningful
             if (string.IsNullOrWhiteSpace(questions))
             {
-                // Call the error method
-                error_method();
+                error_method("ChatBot", "Please enter a valid question.");
+                question.Clear();
+                return;
             }
-            else
+
+
+
+            // Check if the question contains only special characters or empty after cleaning
+            if (questions.Length == 0 || string.IsNullOrWhiteSpace(questions))
             {
-                // Show the user's question in the chat
-                chats.Items.Add("You: " + questions);
+                error_method("ChatBot", "I couldn't understand that.");
+                question.Clear();
+                return;
+            }
 
-                // Temp variables and arrays
-                string[] words = questions.Split(' ');
-                bool found = false;
-                string message = string.Empty;
-                Random indexer = new Random();
+            // Variables for processing
+            string[] words = questions.ToLower().Split(new char[] { ' ', ',', '.', '?', '!', ';', ':' }, StringSplitOptions.RemoveEmptyEntries);
+            bool found = false;
+            string message = string.Empty;
+            Random indexer = new Random();
+            List<string> per_word = new List<string>();
+            List<string> answers_found = new List<string>();
 
-                ArrayList per_word = new ArrayList();
-                ArrayList answers_found = new ArrayList();
 
-                // Iterate per word from the words array
-                foreach (String word in words)
+
+
+
+
+            // Process each word
+            foreach (string word in words)
+            {
+                // Skip very short words or ignored words
+                if (word.Length < 3 || ignore.Contains(word.ToLower()))
+                    continue;
+
+                per_word.Clear();
+
+
+
+
+
+                //start of interests
+
+
+
+
+                if (word.Contains("interested"))
                 {
-                    // Check if the word is allowed or not
-                    if (!ignore.Contains(word.ToLower()))
-                    {
-                        per_word.Clear();
-                        bool wordFoundInReply = false; // Local tracking variable for this specific word
+                    string store_interests = string.Empty;
+                    bool found_interest = false;
 
-                        // Search for the answer of the allowed word
-                        foreach (string answer in reply)
+                    HashSet<string> currentInterests = new HashSet<string>();
+
+                    foreach (string interest in words)
+                    {
+                        // CLEAN INPUT
+                        string clean = interest.ToLower().Trim();
+                        clean = Regex.Replace(clean, @"[^a-zA-Z0-9\s]", "");
+
+                        // FILTER NOISE WORDS
+                        if (!ignore.Contains(clean) && clean != "interested" && clean != "and" && clean != "in" && clean.Length >= 3)
                         {
-                            if (answer.Contains(word.ToLower()))
+                            found_interest = true;
+                            currentInterests.Add(clean);
+                        }
+                    }
+
+
+                    // prepare interests
+                    store_interests = string.Join(", ", currentInterests);
+
+                    if (found_interest && !string.IsNullOrWhiteSpace(store_interests))
+                    {
+                        string filename = "interested_topic.txt";
+                        bool userFound = false;
+
+                        if (File.Exists(filename))
+                        {
+                            string[] lines = File.ReadAllLines(filename);
+
+                            for (int i = 0; i < lines.Length; i++)
                             {
-                                found = true;
-                                wordFoundInReply = true;
-                                per_word.Add(answer); // Store all answers for the word
+                                if (lines[i].StartsWith(username))
+                                {
+                                    userFound = true;
+
+                                    //get all the interests
+                                    string existing = lines[i].Replace(username + " interested in:", "").ToLower();
+
+                                    HashSet<string> existingSet = new HashSet<string>(existing.Split(',').Select(x => x.Trim()).Where(x => x != ""));
+
+                                    // remove dumplicates
+                                    foreach (string item in currentInterests)
+                                    {
+                                        existingSet.Add(item);
+                                    }
+
+                                    string finalList = string.Join(", ", existingSet);
+
+                                    lines[i] = username + " interested in: " + finalList;
+                                    File.WriteAllLines(filename, lines);
+
+                                    message += "great, i added " + store_interests + " to your interests and ";
+                                    break;
+                                }
                             }
                         }
 
-                        // Check if an answer was found for THIS specific word before picking a random index
-                        if (wordFoundInReply && per_word.Count > 0)
+                        if (!userFound)
                         {
-                            int indexing = indexer.Next(0, per_word.Count);
-                            answers_found.Add(per_word[indexing]);
+                            File.AppendAllText(
+                                filename,
+                                username + " interested in: " + store_interests + "\n"
+                            );
+
+                            message += "great, i will remember that you are interested in " + store_interests + " and ";
                         }
+                    }
+                    else
+                    {
+                        message += "Please specify what you're interested in (e.g., 'I am interested in cybersecurity')";
                     }
                 }
 
-                // Check and show the user the answers
-                if (found)
+
+
+                //end of interests
+
+
+
+
+                // Search for matching answers
+                bool wordFound = false;
+                foreach (string answer in reply)
                 {
-                    // Get all of answers and show to the user
-                    foreach (string per_answer in answers_found)
+                    if (answer.ToLower().Contains(word))
                     {
-                        message += per_answer + "\n";
+                        wordFound = true;
+                        per_word.Add(answer);
                     }
+                }
 
-                    // Add visual separation
-                    chats.Items.Add(new Separator());
+                if (wordFound && per_word.Count > 0)
+                {
+                    found = true;
+                    int indexing = indexer.Next(0, per_word.Count);
+                    answers_found.Add(per_word[indexing]);
+                }
+            }
 
-                    // Beautifully formatted rich-text response matching your UI setup
-                    chats.Items.Add(new TextBlock
-                    {
-                        Inlines = {
-                            new Run {
-                                Text = "Cyber Watch AI : \n" ,
-                                Foreground = Brushes.Green,
-                                FontWeight = FontWeights.Bold
-                            },
-                            new Run {
-                                Text = message ,
-                                Foreground = Brushes.Yellow
-                            }
-                        }
-                    });
+            // Show responses or error message
+            if (found && answers_found.Count > 0)
+            {
+                // Remove duplicate answers
+                answers_found = answers_found.Distinct().ToList();
 
-                    chats.Items.Add(new Separator());
+                foreach (string per_answer in answers_found)
+                {
+                    message += per_answer + "\n";
+                }
 
-                    // Auto scroll to the end of the list view
-                    chats.ScrollIntoView(chats.Items[chats.Items.Count - 1]);
+                error_method("ChatBot", message.TrimEnd('\n'));
+
+
+                chats.ScrollIntoView(chats.Items[chats.Items.Count - 1]);
+            }
+            else
+            {
+                // when nothing is found
+                string[] fallbackMessages = {
+            "I'm sorry, I don't understand that. Could you rephrase your question?",
+            "I didn't quite get that. Try asking about cyber security topics.",
+            "Hmm, I'm not sure how to respond to that. Can you ask something else?",
+            "I couldn't find an answer for that. Please ask about programming, security, or technology.",
+            "My apologies, I don't have information on that topic yet."
+        };
+
+                Random random = new Random();
+                string fallbackMessage = fallbackMessages[random.Next(fallbackMessages.Length)];
+                error_method("ChatBot", fallbackMessage);
+            }
+
+            // Clear the input box
+            question.Clear();
+
+
+        }
+
+        //end of ai_chat method
+
+
+
+
+        //method to remove special characters
+        private string RemoveSpecialCharacters(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return string.Empty;
+
+            StringBuilder sanitized = new StringBuilder();
+
+            foreach (char c in input)
+            {
+                // Keep letters, numbers, spaces, and basic punctuation
+                if (char.IsLetterOrDigit(c) || char.IsWhiteSpace(c) || c == '\'' || c == '-')
+                {
+                    sanitized.Append(c);
                 }
                 else
                 {
-                    // Fallback message if no keywords match anything in your reply array
-                    chats.Items.Add(new TextBlock
-                    {
-                        Inlines = {
-                            new Run {
-                                Text = "Cyber Watch AI : " ,
-                                Foreground = Brushes.Red,
-                            },
-                            new Run {
-                                Text = "I am unsure how to respond to that. Please rephrase your question." ,
-                                Foreground = Brushes.White
-                            }
-                        }
-                    });
+                    // Replace other special characters with space
+                    sanitized.Append(' ');
                 }
-
-                // Clear the text box for the next question
-                question.Clear();
             }
+
+            // Clean up extra spaces and trim
+            string result = sanitized.ToString();
+            result = System.Text.RegularExpressions.Regex.Replace(result, @"\s+", " ").Trim();
+
+            return result;
         }
 
-        // Error method
-        private void error_method()
+
+        //end of method to remove special characters
+
+
+
+
+
+        //method count to show interests randomly
+        private void auto_show_interest()
         {
-            // Call the chats which is a listview and add formatted text
-            chats.Items.Add(
-                new TextBlock
+            //check if three times
+            if (counting == 3)
+            {
+                //read the user's interests from file
+                string filename = "interested_topic.txt";
+
+                if (File.Exists(filename))
                 {
-                    Inlines = {
-                        new Run {
-                            Text = "Cyber Watch AI : " ,
-                            Foreground = Brushes.Red,
-                        },
-                        new Run {
-                            Text = "Please enter a question !! ",
-                            Foreground = Brushes.Red
+                    string[] lines = File.ReadAllLines(filename);
+
+                    //find the user's line
+                    foreach (string line in lines)
+                    {
+                        if (line.StartsWith(username))
+                        {
+                            //get the interests part
+                            int colonIndex = line.IndexOf("interested in:");
+                            if (colonIndex >= 0)
+                            {
+                                string interests = line.Substring(colonIndex + 14).Trim();
+
+                                //show reminder of interests
+                                error_method("ChatBot", "Just a reminder, you are interested in " + interests + " and ");
+                                ai_check(interests);
+                                break;
+                            }
                         }
                     }
                 }
-            );
 
-            // Auto scroll to show the error
-            chats.ScrollIntoView(chats.Items[chats.Items.Count - 1]);
-        }
-
-        private void submit_name(object sender, RoutedEventArgs e)
-        {
-            // Temp variables
-            string filename = "user_names.txt";
-
-            // Check if the name exists or not, then auto create
-            if (!File.Exists(filename))
-            {
-                // Auto create the file
-                File.AppendAllText(filename, "auto_create\n");
-            }
-
-            // Temp variable to store the name
-            string name = user_name.Text.ToString();
-            bool found = check_name(name);
-
-            if (!found)
-            {
-                // Store username into the text file
-                MessageBox.Show("Welcome " + name + " to Cyber Watch AI !!");
-                File.AppendAllText(filename, name + "\n");
-
-                // Hide the name input and show chat grid
-                name_grid.Visibility = Visibility.Hidden;
-                Chat_Grid.Visibility = Visibility.Visible;
+                //reset counting
+                counting = 0;
             }
             else
             {
-                // Welcome back the user
-                MessageBox.Show("Welcome back " + name + " to Cyber Watch AI !!");
-
-                name_grid.Visibility = Visibility.Hidden;
-                Chat_Grid.Visibility = Visibility.Visible;
+                //incrementing
+                counting += 1;
             }
         }
+        //end of count interest method
 
-        // Check_name method to check if name exists or not
-        private Boolean check_name(string name)
+
+
+
+
+
+        // Updated error method with better formatting
+        private void error_method(string name, string message)
         {
-            string filename = "user_names.txt";
-            bool name_found = false;
-
-            // One dimension array to read all names from the text file
-            string[] names = File.ReadAllLines(filename);
-
-            // For each to look through the array to search for current user name
-            foreach (string search_name in names)
+            // Create a border for chats
+            Border messageBorder = new Border
             {
-                // Check if the user name is found
-                if (search_name.ToLower() == name.ToLower())
-                {
-                    name_found = true;
-                }
+                Margin = new Thickness(0, 2, 0, 2),
+                Padding = new Thickness(5, 3, 5, 3),
+                CornerRadius = new CornerRadius(5)
+            };
+
+            // Set different background for user vs bot
+            if (name.ToLower().Contains("chatbot") || name.ToLower().Contains("chat"))
+            {// Light blue
+                messageBorder.Background = new SolidColorBrush(Color.FromRgb(240, 248, 255));
+                messageBorder.BorderBrush = new SolidColorBrush(Color.FromRgb(173, 216, 230));
             }
+            else
+            {    // Light gray
+                messageBorder.Background = new SolidColorBrush(Color.FromRgb(245, 245, 245));
+                messageBorder.BorderBrush = new SolidColorBrush(Color.FromRgb(211, 211, 211));
+            }
+            messageBorder.BorderThickness = new Thickness(1);
 
-            // Returning status if the user is found or not
-            return name_found;
-        }
-    }
-}
+            TextBlock messageText = new TextBlock
+            {
+                TextWrapping = TextWrapping.Wrap,
+                Margin = new Thickness(2)
+            };
 
+            // Set color based on sender
+            Brush nameColor = (name.ToLower().Contains("chatbot") || name.ToLower().Contains("chat")) ?
+                              Brushes.DarkRed : Brushes.White;
+
+            Brush messageColor = Brushes.Black;
+
+            messageText.Inlines.Add(new Run
+            {
+                Text = name + ": ",
+                Foreground = nameColor,
+                FontWeight = FontWeights.Bold
+            });
+
+            messageText.Inlines.Add(new Run
+            {
+                Text = message,
+                Foreground = messageColor
+            });
+
+            messageBorder.Child = messageText;
+            chats.Items.Add(messageBorder);
+
+            chats.ScrollIntoView(chats.Items[chats.Items.Count - 1]);
+        }//end of error method
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }//end of class
+}//end of namespace

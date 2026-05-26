@@ -313,7 +313,9 @@ namespace CYBER_WATCH_AI_POE_PART_2
         {//start of method
 
 
-            add_answers.Add("Hi");
+            add_answers.Add("hi");
+            add_answers.Add("hi, how are you?");
+            add_answers.Add("hi , hello again");
 
             add_answers.Add("greeting i'm doing well, thanks for asking! how are you doing today ?");
             add_answers.Add("greeting i'm great today, thanks for asking! how can i help you today ?");
