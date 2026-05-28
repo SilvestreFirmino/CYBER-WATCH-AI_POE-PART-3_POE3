@@ -1,0 +1,38 @@
+name: Build WPF App
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2
+
+    - name: Restore NuGet packages
+      run: nuget restore
+
+    - name: Build Solution
+      run: msbuild CYBER-WATCH-AI_POE-PART-2.sln /p:Configuration=Release
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: CYBER-WATCH-AI-Build
+        path: |
+          **/bin/Release/
