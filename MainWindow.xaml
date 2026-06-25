@@ -5,200 +5,393 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CYBER_WATCH_AI_POE_PART_2"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Cyber Watch AI"
+        Height="500"
+        Width="900"
+        Background="Black"
+        WindowStartupLocation="CenterScreen">
+
     <Grid>
 
-        <!-- 
-            HOME GRID
-            This grid serves as the main landing page  of the application.
-            It contains a logo for AI , a welcome message to greet users,
-            and a navigation button to proceed to the next section.
-            Currently hidden by default.
-        -->
-        <Grid x:Name="home_grid" Visibility="Visible"
-              Background="Black">
+        <!-- HOME GRID -->
+        <Grid x:Name="home_grid" Visibility="Visible" Background="Black">
 
+            <Image Source="/eyelogo2.png"
+                   Height="200"
+                   Width="300"
+                   Margin="0,20,0,0"
+                   VerticalAlignment="Top"
+                   HorizontalAlignment="Center"
+                   Opacity="0.6"/>
 
-            <!-- Logo -->
+            <TextBlock Text="WELCOME TO"
+                       Foreground="White"
+                       FontSize="18"
+                       FontFamily="Trebuchet MS"
+                       HorizontalAlignment="Center"
+                       Margin="0,190,0,0"
+                       VerticalAlignment="Top"/>
 
-            <Image 
-                Source="/eyelogo2.png"
-                Margin="0,30,0,0" HorizontalAlignment="Center" Width="300" Height="200" VerticalAlignment="Top"
-                Opacity="0.6"
-                   />
-            <!-- welcome message-->
+            <TextBlock Text="CYBER WATCH AI"
+                       Foreground="White"
+                       FontSize="28"
+                       FontWeight="Bold"
+                       FontFamily="Trebuchet MS"
+                       HorizontalAlignment="Center"
+                       Margin="0,220,0,0"
+                       VerticalAlignment="Top"/>
 
+            <TextBlock Text="Your intelligent cybersecurity assistant"
+                       Foreground="White"
+                       FontSize="15"
+                       FontFamily="Trebuchet MS"
+                       HorizontalAlignment="Center"
+                       Margin="0,265,0,0"
+                       VerticalAlignment="Top"/>
 
-
-            <TextBlock
-                Text="CYBER WATCHER AI chatbot,"
-                Foreground="White"
-                FontWeight="Bold"
-                Height="38"
-                FontFamily="Trebuchet MS"
-                TextAlignment="Center"
-                Margin="0,230,0,0"
-                FontSize="26"
-                 HorizontalAlignment="Center" Width="518" VerticalAlignment="Top"
-                />
-            <TextBlock
-                Text="WELCOME TO"
-                
-                Height="38"
-                FontFamily="Trebuchet MS"
-                TextAlignment="Center"
-                Margin="0,192,0,0"
-                FontSize="18"
-                Foreground="White" HorizontalAlignment="Center" Width="518" VerticalAlignment="Top"
-                />
-            <TextBlock
-                Text="click here to continue "
-                
-                Height="38"
-                FontFamily="Trebuchet MS"
-                TextAlignment="Center"
-                Margin="141,273,0,0"
-                FontSize="16"
-                Foreground="White" HorizontalAlignment="Left" Width="518" VerticalAlignment="Top"
-                />
-
-            <!-- button to continue-->
-            <Button 
-                Background="DarkRed"
-                
-                Height="40"
-                Width="200"
-                Margin="0,311,0,0"
-                Content="ENTER"
-                FontSize="18"
-                Click="proceed"
-                Foreground="White"
-                FontFamily="Trebuchet MS" HorizontalAlignment="Center" VerticalAlignment="Top"
-                />
-
+            <Button Content="ENTER SYSTEM"
+                    Height="42"
+                    Width="220"
+                    Margin="0,320,0,0"
+                    Click="proceed"
+                    Background="DarkRed"
+                    Foreground="White"
+                    FontFamily="Trebuchet MS"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"/>
         </Grid>
 
-        <!-- 
-            USERNAME GRID
-            This grid is for prompting the user for username.
-            It contains a logo for AI, a textbox for users to enter their name,
-            and a submit button to save the username.
-            Hidden .
-        -->
+        <!-- USERNAME GRID -->
         <Grid x:Name="username_grid" Visibility="Hidden" Background="Black">
 
+            <Image Source="/eyelogo2.png"
+                   Height="180"
+                   Width="280"
+                   Margin="0,20,0,0"
+                   VerticalAlignment="Top"
+                   HorizontalAlignment="Center"
+                   Opacity="0.6"/>
 
-            <!-- Logo -->
-            <Image 
-                Height= "200"
-                Width="300"
-                Source="/eyelogo2.png"
-                Margin="0,10,0,0" HorizontalAlignment="Center" VerticalAlignment="Top"
-                Opacity="0.6"
-                   />
-            <TextBlock
-                     Text="CYBER WATCHER AI chatbot"
+            <TextBlock Text="CYBER WATCH AI"
+                       Foreground="White"
+                       FontWeight="Bold"
+                       FontSize="26"
+                       FontFamily="Trebuchet MS"
+                       HorizontalAlignment="Center"
+                       Margin="0,180,0,0"
+                       VerticalAlignment="Top"/>
+
+            <TextBlock Text="Enter your username to continue"
+                       Foreground="White"
+                       FontSize="14"
+                       FontFamily="Trebuchet MS"
+                       HorizontalAlignment="Center"
+                       Margin="0,225,0,0"
+                       VerticalAlignment="Top"/>
+
+            <TextBox x:Name="usernames_input"
+                     Height="40"
+                     Width="280"
+                     Margin="0,260,0,0"
+                     Background="Black"
                      Foreground="White"
-                FontWeight="Bold"
-                     Height="38"
-                     FontFamily="Trebuchet MS"
+                     BorderBrush="DarkRed"
                      TextAlignment="Center"
-                     Margin="0,165,0,0"
-                     FontSize="26"
-                     HorizontalAlignment="Center" Width="518" VerticalAlignment="Top"
-    />
-            <!-- Hint message-->
-            <TextBlock
-                FontWeight="Bold"
-                Foreground="White"
-                FontSize="14"
-                Text="Enter username"
-                Height="20"
-                Width="270"
-                TextAlignment="Justify"
-                Margin="0,30,0,0"
-                FontFamily="Trebuchet MS"
-                />
+                     FontFamily="Trebuchet MS"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Top"/>
 
-            <!-- Enter/Prompt username-->
-            <TextBox
-                Background="Black"
-                Foreground="White"
-                Height="40"
-                Width="270"
-                TextAlignment="Center"
-                Margin="0,100,0,0"
-                FontFamily="Trebuchet MS"
-                x:Name="usernames_input"
-                />
-
-            <!-- error message-->
-            <TextBlock
-         Text="please enter username to continue..."
-         Height="20"
-         Width="270"
-         TextAlignment="Justify"
-         Margin="0,180,0,0"
-         Foreground="Red"
-         FontFamily="Trebuchet MS"
-         />
-
-            <!-- button to submit name-->
-            <Button 
-        Height="40"
-        Width="270"
-        Margin="0,250,0,0"
-        Content="CONFIRM USERNAME"
-        Click="submit_name"
-                Background="DarkRed"
-                Foreground="White"
-                FontFamily="Trebuchet MS"
-        />
-
+            <Button Content="CONFIRM USERNAME"
+                    Height="40"
+                    Width="280"
+                    Margin="0,320,0,0"
+                    Click="submit_name"
+                    Background="DarkRed"
+                    Foreground="White"
+                    FontFamily="Trebuchet MS"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"/>
         </Grid>
 
-        <!-- 
-            CHAT GRID
-            This grid handles all messaging and conversation-related features of the application.
-            It contains a ListView to display chat messages, a textbox for typing questions,
-            and a submit button to send the question to the chat.
-            Starting in a hidden state.
-        -->
-        <Grid x:Name="chat_grid" Visibility="Hidden" Background="Black">
+        <!-- MAIN APPLICATION PAGE -->
+        <Grid Height="500"
+              Width="900"
+              x:Name="MainPage"
+              Visibility="Hidden"
+              Background="Black">
 
+            <!-- RIGHT SIDE MENU -->
+            <Grid Margin="680,0,0,0"
+                  Background="#161616"
+                  Width="220">
 
-            <!-- List view to show messages show messages-->
-            <ListView  
-                Background="Black"
-                x:Name="chats" 
-                Height="300"
-                Margin="0,0,0,120"
-                />
+                <StackPanel Width="180"
+                            Margin="0,30,0,0"
+                            HorizontalAlignment="Center">
 
+                    <TextBlock Text="CYBER MENU"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               Foreground="White"
+                               FontFamily="Trebuchet MS"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,20"/>
 
-            <!-- TextBox to prompt questions-->
-            <TextBox
-                Background="Black"
-                Foreground="White"
-                FontFamily="Trebuchet MS"
-                x:Name="question"
-                Height="50"
-                Width="480"
-                Margin="0,300,300,0"
-                />
+                    <Button Content="CHAT"
+                            Margin="0,5"
+                            Height="40"
+                            Click="chatting"
+                            Background="DarkRed"
+                            Foreground="White"
+                            FontFamily="Trebuchet MS"/>
 
-            <!-- button to submit -->
-            <Button
-                Height="50"
-                Width="280"
-                Margin="490,300,0,0"
-                Content="SUBMIT  "
-                Click="send"
-                Background="DarkRed"
-                Foreground="White"
-                />
+                    <Button Content="TASK REMINDERS"
+                            Margin="0,5"
+                            Height="40"
+                            Click="reminders"
+                            Background="DarkRed"
+                            Foreground="White"
+                            FontFamily="Trebuchet MS"/>
+
+                    <Button Content="ACTIVITY LOG"
+                            Margin="0,5"
+                            Height="40"
+                            Click="activity"
+                            Background="DarkRed"
+                            Foreground="White"
+                            FontFamily="Trebuchet MS"/>
+
+                    <Button Content="CYBER QUIZ"
+                            Margin="0,20,0,0"
+                            Height="40"
+                            Click="game"
+                            Background="DarkRed"
+                            Foreground="White"
+                            FontFamily="Trebuchet MS"/>
+
+                    <Button Content="EXIT"
+                            Margin="0,20,0,0"
+                            Height="40"
+                            Click="exit"
+                            Background="DarkRed"
+                            Foreground="White"
+                            FontFamily="Trebuchet MS"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- CHAT PAGE -->
+            <Grid Margin="0,0,220,0"
+                  x:Name="chat_page"
+                  Visibility="Visible"
+                  Background="Black">
+
+                <TextBlock Text="CYBER WATCH AI CHAT"
+                           Foreground="White"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           FontFamily="Trebuchet MS"
+                           HorizontalAlignment="Center"
+                           Margin="0,15,0,0"
+                           VerticalAlignment="Top"/>
+
+                <ListView Margin="20,55,20,100"
+                          x:Name="chats"
+                          Background="#111111"
+                          Foreground="White"
+                          BorderBrush="DarkRed"/>
+
+                <TextBox Margin="20,390,170,40"
+                         x:Name="question"
+                         Height="45"
+                         Background="Black"
+                         Foreground="White"
+                         BorderBrush="DarkRed"
+                         FontFamily="Trebuchet MS"/>
+
+                <Button Content="SEND"
+                        Click="send"
+                        Height="45"
+                        Margin="500,390,20,40"
+                        Background="DarkRed"
+                        Foreground="White"
+                        FontFamily="Trebuchet MS"/>
+            </Grid>
+
+            <!-- REMINDER PAGE -->
+            <Grid Margin="0,0,220,0"
+                  x:Name="reminderPage"
+                  Visibility="Hidden"
+                  Background="Black">
+
+                <TextBlock Text="TASK REMINDERS"
+                           Foreground="White"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           FontFamily="Trebuchet MS"
+                           HorizontalAlignment="Center"
+                           Margin="0,15,0,0"
+                           VerticalAlignment="Top"/>
+
+                <ListView Margin="20,55,20,110"
+                          x:Name="view_tasks"
+                          Background="#111111"
+                          Foreground="White"
+                          BorderBrush="DarkRed"
+                          MouseDoubleClick="remind_append_MouseDoubleClick"/>
+
+                <TextBlock Text="All tasks will appear here. Double-click a completed task to manage or remove it."
+                           TextAlignment="Center"
+                           Margin="20,400,20,20"
+                           TextWrapping="Wrap"
+                           Foreground="Red"
+                           FontFamily="Trebuchet MS"/>
+            </Grid>
+
+            <!-- HISTORY PAGE -->
+            <Grid Margin="0,0,220,0"
+                  x:Name="HistoryPage"
+                  Visibility="Hidden"
+                  Background="Black">
+
+                <TextBlock Text="USER INTEREST HISTORY"
+                           Foreground="White"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           FontFamily="Trebuchet MS"
+                           HorizontalAlignment="Center"
+                           Margin="0,15,0,0"
+                           VerticalAlignment="Top"/>
+
+                <ListView Margin="20,55,20,110"
+                          x:Name="history_append"
+                          Background="#111111"
+                          Foreground="White"
+                          BorderBrush="DarkRed"/>
+
+                <TextBlock Text="Interests detected during chats will appear here for tracking and personalization."
+                           TextAlignment="Center"
+                           Margin="20,400,20,20"
+                           TextWrapping="Wrap"
+                           Foreground="Red"
+                           FontFamily="Trebuchet MS"/>
+            </Grid>
+
+            <!-- ACTIVITY LOG PAGE -->
+            <Grid Margin="0,0,220,0"
+                  x:Name="LogPage"
+                  Visibility="Hidden"
+                  Background="Black">
+
+                <TextBlock Text="ACTIVITY LOG"
+                           Foreground="White"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           FontFamily="Trebuchet MS"
+                           HorizontalAlignment="Center"
+                           Margin="0,15,0,0"
+                           VerticalAlignment="Top"/>
+
+                <ListView Margin="20,55,20,110"
+                          x:Name="log_append"
+                          Background="#111111"
+                          Foreground="White"
+                          BorderBrush="DarkRed"/>
+
+                <TextBlock Text="System actions, user events, and chatbot activity will be recorded here."
+                           TextAlignment="Center"
+                           Margin="20,400,20,20"
+                           TextWrapping="Wrap"
+                           Foreground="Red"
+                           FontFamily="Trebuchet MS"/>
+            </Grid>
+
+            <!-- GAME PAGE -->
+            <Grid Margin="0,0,220,0"
+                  x:Name="gamePage"
+                  Visibility="Hidden"
+                  Background="Black">
+
+                <TextBlock Text="CYBER SECURITY QUIZ"
+                           Foreground="White"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           FontFamily="Trebuchet MS"
+                           HorizontalAlignment="Center"
+                           Margin="0,15,0,0"
+                           VerticalAlignment="Top"/>
+
+                <Grid x:Name="quizGame_page"
+                      Margin="20,60,20,20">
+
+                    <TextBlock x:Name="question_asked"
+                               Text="Question"
+                               Foreground="White"
+                               FontSize="20"
+                               FontFamily="Trebuchet MS"
+                               TextAlignment="Center"
+                               Margin="0,10,0,280"/>
+
+                    <Button x:Name="optionButtonOne"
+                            Content=""
+                            Height="40"
+                            Width="260"
+                            Margin="0,120,300,0"
+                            VerticalAlignment="Top"
+                            Click="optionSelected"
+                            Background="#333333"
+                            Foreground="White"/>
+
+                    <Button x:Name="optionButtonTwo"
+                            Content=""
+                            Height="40"
+                            Width="260"
+                            Margin="300,120,0,0"
+                            VerticalAlignment="Top"
+                            Click="optionSelected"
+                            Background="#333333"
+                            Foreground="White"/>
+
+                    <Button x:Name="optionButtonThree"
+                            Content=""
+                            Height="40"
+                            Width="260"
+                            Margin="0,190,300,0"
+                            VerticalAlignment="Top"
+                            Click="optionSelected"
+                            Background="#333333"
+                            Foreground="White"/>
+
+                    <Button x:Name="optionButtonFour"
+                            Content=""
+                            Height="40"
+                            Width="260"
+                            Margin="300,190,0,0"
+                            VerticalAlignment="Top"
+                            Click="optionSelected"
+                            Background="#333333"
+                            Foreground="White"/>
+
+                    <Button Content="ANSWER"
+                            Height="40"
+                            Width="120"
+                            Margin="0,280,0,0"
+                            VerticalAlignment="Top"
+                            HorizontalAlignment="Center"
+                            Click="answerButton"
+                            Background="DarkRed"
+                            Foreground="White"/>
+
+                    <TextBlock x:Name="score_count"
+                               Text="Score"
+                               Foreground="White"
+                               FontSize="18"
+                               FontFamily="Trebuchet MS"
+                               HorizontalAlignment="Left"
+                               Margin="10,10,0,0"
+                               VerticalAlignment="Top"/>
+                </Grid>
+            </Grid>
 
         </Grid>
-
     </Grid>
 </Window>
