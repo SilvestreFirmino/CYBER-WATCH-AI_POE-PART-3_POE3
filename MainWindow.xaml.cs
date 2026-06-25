@@ -5,9 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Media;
 
 
@@ -18,9 +20,10 @@ namespace CYBER_WATCH_AI_POE_PART_2
     {//start of class
 
 
+
         //creating an instance for the class Array
-        ArrayList reply = new ArrayList();
-        ArrayList ignore = new ArrayList();
+        public ArrayList reply = new ArrayList();
+        public ArrayList ignore = new ArrayList();
         user_name check_name = new user_name();
 
         // variables
@@ -29,20 +32,284 @@ namespace CYBER_WATCH_AI_POE_PART_2
         int counting = 0;
 
 
+        //creating a class training with an object name train_ai
+        nlp_processor train_ai = new nlp_processor();
+
+
+        //for the tasks class with database to add task for reminder
+        //create an instance for the class tasks
+        //with an object name manage_tasks
+        tasks manage_tasks = new tasks();
+        //global variable to hold the task details
+        string task_name, task_description, task_dueDate, task_status = string.Empty;
+
+
+
+
+
+
+        // Counter for tracking how many times the user has interacted (used for reminders)
+        int count_interest = 0;
+
+        // Tracks the current quiz question index
+        int currentQuestionIndex = 0;
+
+        // Holds the user’s current quiz score
+        int score = 0;
+
+        // Stores the user’s currently selected answer
+        string selectedAnswer = null;
+
+        // Stores the list of answer buttons for the current quiz question
+        List<Button> answerButtons;
+
+        // Holds the entire list of quiz questions
+        List<quiz_question> questions;
+
+        // Handles loading quiz questions from storage or file
+        quiz_game gameLoad = new quiz_game();
+
+
 
         public MainWindow()
         {
             InitializeComponent();
 
+
+            //store answers 
             new respond(reply, ignore) { };
 
+            //train NLP on the run
+            train_ai.Train();
+            manage_tasks.CreateTableIfNotExists();
             //creating an instance for the class voice_greeting 
             //with an object name greet
             voice_greeting greet = new voice_greeting();
 
             //call the voice method
             greet.greet();
+
+            // Dynamically add all buttons to the UI (custom logic)
+            addAllButtons();
+
+            // Load quiz questions automatically into the 'questions' list
+            gameLoad.autoLoadQuiz(ref questions);
+
+            // Load questions into the UI for display or interaction
+            loadQuestions();
+
         }
+
+
+
+
+
+
+
+        // Switch to the Chats page
+        private void chatting(object sender, RoutedEventArgs e)
+        {
+            // Show chats page and hide all others
+            chat_page.Visibility = Visibility.Visible;
+            HistoryPage.Visibility = Visibility.Hidden;
+            reminderPage.Visibility = Visibility.Hidden;
+            LogPage.Visibility = Visibility.Hidden;
+            gamePage.Visibility = Visibility.Hidden;
+        }
+
+        // Switch to the Reminders page
+        private void reminders(object sender, RoutedEventArgs e)
+        {
+            // Show reminders page and hide all others
+            chat_page.Visibility = Visibility.Hidden;
+            HistoryPage.Visibility = Visibility.Collapsed;
+            reminderPage.Visibility = Visibility.Visible;
+            LogPage.Visibility = Visibility.Hidden;
+            gamePage.Visibility = Visibility.Hidden;
+
+
+
+            //call the auto load task method, to show all the tasks
+            autoLoad_task();
+        }
+
+        // Switch to the History page
+        private void history(object sender, RoutedEventArgs e)
+        {
+            // Show history page and hide all others
+            chat_page.Visibility = Visibility.Hidden;
+            HistoryPage.Visibility = Visibility.Visible;
+            reminderPage.Visibility = Visibility.Hidden;
+            LogPage.Visibility = Visibility.Hidden;
+            gamePage.Visibility = Visibility.Hidden;
+
+
+        }
+
+        // Switch to the Activity Log page
+        private void activity(object sender, RoutedEventArgs e)
+        {
+            // Show log page and hide all others
+            chat_page.Visibility = Visibility.Hidden;
+            HistoryPage.Visibility = Visibility.Hidden;
+            reminderPage.Visibility = Visibility.Hidden;
+            LogPage.Visibility = Visibility.Visible;
+            gamePage.Visibility = Visibility.Hidden;
+
+            // Scroll to the latest activity log entry
+
+        }
+
+        // Switch to the Game page
+        private void game(object sender, RoutedEventArgs e)
+        {
+            // Show game page and hide all others
+            chat_page.Visibility = Visibility.Hidden;
+            HistoryPage.Visibility = Visibility.Hidden;
+            reminderPage.Visibility = Visibility.Hidden;
+            LogPage.Visibility = Visibility.Hidden;
+            gamePage.Visibility = Visibility.Visible;
+        }
+
+        // Exit the application
+        private void exit(object sender, RoutedEventArgs e)
+        {
+            // Terminate the application immediately
+            System.Environment.Exit(0);
+        }
+
+
+
+
+
+
+        //method to add all the buttons
+        private void addAllButtons()
+        {
+
+            answerButtons = new List<Button> {
+                         optionButtonOne,
+                         optionButtonTwo,
+                        optionButtonThree,
+                        optionButtonFour
+
+        };
+
+        }//end of code
+
+        //reset buttons background 
+        private void buttonReset()
+        {
+            //reseting the background color of the button when clicked
+            foreach (Button clickButton in answerButtons)
+            {
+                //resetting the background color of the button
+                clickButton.ClearValue(Button.BackgroundProperty);
+                clickButton.Background = System.Windows.Media.Brushes.Gray;
+
+
+            }
+
+
+        }
+
+        //creating a method to load the questions
+        private void loadQuestions()
+        {
+            //checking if the user didnt complete the quiz
+            if (currentQuestionIndex >= questions.Count)
+            {
+                //display message for when the quiz is not completed
+                MessageBox.Show("Great job! You’ve completed the quiz with a score of " + score + ".\nThe game will now reset. Press OK to continue.");
+                currentQuestionIndex = 0;
+                score = 0;
+                selectedAnswer = null;
+                loadQuestions();
+                return;
+            }
+
+            //get the question
+            var foundQuestion = questions[currentQuestionIndex];
+            question_asked.Text = foundQuestion.Text;
+
+            //setting  up the score
+            score_count.Text = "score.." + "\n" + score;
+
+            //resetting the selected answer
+            selectedAnswer = null;
+
+            //resetting the buttons
+            buttonReset();
+
+            //randomizing answers
+            List<string> allAnswers = new List<string>(foundQuestion.wrongAnswer);
+            allAnswers.Add(foundQuestion.correctAnswer);
+
+            //creating an instance for the randomize class
+            Random getIndex = new Random();
+            for (int count = 0; count < allAnswers.Count; count++)
+            {
+                int found_index = getIndex.Next(count, allAnswers.Count);
+
+                (allAnswers[count], allAnswers[found_index]) = (allAnswers[found_index], allAnswers[count]);
+
+
+            }
+
+            //assigning answers to the buttons
+            for (int count = 0; count < answerButtons.Count; count++)
+            {
+                answerButtons[count].Content = allAnswers[count];
+
+            }
+
+
+
+        }//end of code
+
+
+
+        //quiz game code
+
+        private void optionSelected(object sender, RoutedEventArgs e)
+        {
+            //calling the button reset method
+            buttonReset();
+            Button clickButton = sender as Button;
+            clickButton.Background = System.Windows.Media.Brushes.Green;
+            selectedAnswer = clickButton.Content.ToString();
+
+
+
+        }
+
+        private void answerButton(object sender, RoutedEventArgs e)
+        {
+            //checking if the user selected an option first
+            if (selectedAnswer == string.Empty)
+            {
+                //display message
+                MessageBox.Show("please select an answer!");
+
+                return;
+            }
+            if (selectedAnswer == questions[currentQuestionIndex].correctAnswer)
+            {
+                score += 5;
+
+            }
+            currentQuestionIndex++;
+            loadQuestions();
+
+
+
+
+
+        }//end of quiz
+
+
+
+
 
 
 
@@ -85,23 +352,78 @@ namespace CYBER_WATCH_AI_POE_PART_2
 
             //Hide username page grid and set chats grid visible
             username_grid.Visibility = Visibility.Hidden;
-            chat_grid.Visibility = Visibility.Visible;
+            MainPage.Visibility = Visibility.Visible;
         }
 
 
 
 
 
+        // Handles double-clicking on an item in the reminder list
+        private void remind_append_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
 
 
+
+
+            //get the selected value
+            string get_selected_value = view_tasks.SelectedValue.ToString();
+
+            //get the id using sub string , from 0 to 1
+            string get_id = get_selected_value.Substring(0, 1);
+            //then cast the string get_id to an int
+            int id = int.Parse(get_id);
+
+            //check if the selected task end with "done", then delete if ends with done
+            if (get_selected_value.ToLower().EndsWith("done"))
+            {//start of if
+
+
+                //if done then delete the task
+                manage_tasks.delete_task(id);
+
+
+            }//end of if
+            else
+            {//start of else
+             //mark it dobe since it is ending with pending not "DONE"
+                manage_tasks.update_taskStatus(id);
+
+
+                // MessageBox.Show(""+  id);
+
+            }//end of else
+
+
+
+            //recall the auto load method
+            autoLoad_task();
+
+        }
+
+
+
+
+        //method to auto load the Tasks of a user
+        private void autoLoad_task()
+        {
+
+
+            //clear the ListView first
+            view_tasks.Items.Clear();
+
+            //use the object name manage_task
+            manage_tasks.load_tasks(view_tasks);
+
+        }
 
 
 
         //send event handler
         private void send(object sender, RoutedEventArgs e)
         {
-            // Get the question from the design and sanitize it
-            string rawQuestion = question.Text.ToString().Trim();
+            // Get the question from the design 
+            string rawQuestion = question.Text.ToString();
 
             if (string.IsNullOrWhiteSpace(rawQuestion))
             {
@@ -125,7 +447,7 @@ namespace CYBER_WATCH_AI_POE_PART_2
 
 
 
-        //start of ai_chat method START EDITING HERE
+        //start of ai_chat method
         private void ai_check(string questions)
         {
 
@@ -148,6 +470,9 @@ namespace CYBER_WATCH_AI_POE_PART_2
                 return;
             }
 
+
+
+
             // Variables for processing
             string[] words = questions.ToLower().Split(new char[] { ' ', ',', '.', '?', '!', ';', ':' }, StringSplitOptions.RemoveEmptyEntries);
             bool found = false;
@@ -159,6 +484,53 @@ namespace CYBER_WATCH_AI_POE_PART_2
 
 
 
+
+            if (questions.ToLower().StartsWith("add task"))
+            {//start of if add task
+
+                //add the task to the listview as part of the chats
+                message += "Great your task is added, would you like a reminder?\n and also ";
+
+                //then filter to get task name
+                task_name = questions.Replace("add task", "");
+
+
+
+            }//end of if checking task add or add task
+
+
+            //check if the user want to set a reminder
+            if (questions.ToLower().StartsWith("yes, remind me in") || questions.ToLower().StartsWith("yes remind me in"))
+            {//start of the reminder if
+
+                //replace the yes, remind me in
+                string reminder = questions.Replace("yes, remind me in", "");
+
+                //then get the number inside the reminder variable
+                string days_number = Regex.Replace(reminder, @"[^0-9]", "");
+
+                //cast the days_number to an int
+                int days = int.Parse(days_number);
+
+                //add the days the user chose to do the task to the current date
+                DateTime user_reminder = DateTime.Now.AddDays(days);
+
+
+
+                //format the date how it should be
+                //Like  06-07-2026 or Jun 15 2026
+                string format_date = user_reminder.ToString("MMMM dd yyyy");
+                //assign the format date with task_dueDate and status
+                task_dueDate = format_date;
+                task_status = "pending";
+
+                //call the insert method to store the task
+                error_method("ChatBot: ", "good , i will remind you in " + days + " days, on the " + format_date + "\n, to view your task click on view tasks");
+                manage_tasks.insert_task(task_name, task_description, task_dueDate, task_status);
+
+                return;
+
+            }//end of the reminder if
 
 
             // Process each word
@@ -292,8 +664,9 @@ namespace CYBER_WATCH_AI_POE_PART_2
                 foreach (string per_answer in answers_found)
                 {
                     message += per_answer + "\n";
+                    task_description += per_answer + " ";
                 }
-
+                //task_description = message.TrimEnd('\n');
                 error_method("ChatBot", message.TrimEnd('\n'));
 
 
@@ -301,18 +674,17 @@ namespace CYBER_WATCH_AI_POE_PART_2
             }
             else
             {
-                // when nothing is found
-                string[] fallbackMessages = {
-            "I'm sorry, I don't understand that. Could you rephrase your question?",
-            "I didn't quite get that. Try asking about cyber security topics.",
-            "Hmm, I'm not sure how to respond to that. Can you ask something else?",
-            "I couldn't find an answer for that. Please ask about programming, security, or technology.",
-            "My apologies, I don't have information on that topic yet."
-        };
 
-                Random random = new Random();
-                string fallbackMessage = fallbackMessages[random.Next(fallbackMessages.Length)];
-                error_method("ChatBot", fallbackMessage);
+
+                string response = train_ai.CheckAndLearn(questions);
+
+
+                // It will learn from unknown questions
+                string unknownResponse = train_ai.CheckAndLearn(questions);
+                //display error message for message not found
+
+
+                error_method("ChatBot", unknownResponse);
             }
 
             // Clear the input box
@@ -414,17 +786,16 @@ namespace CYBER_WATCH_AI_POE_PART_2
         // Updated error method with better formatting
         private void error_method(string name, string message)
         {
-            // Create message bubble
+            // Create a border for chats
             Border messageBorder = new Border
             {
-                Margin = new Thickness(8, 5, 8, 5),
-                Padding = new Thickness(10),
-                CornerRadius = new CornerRadius(10),
-                BorderThickness = new Thickness(1.5)
+                Margin = new Thickness(0, 2, 0, 2),
+                Padding = new Thickness(5, 3, 5, 3),
+                CornerRadius = new CornerRadius(5)
             };
 
             bool isBot = name.ToLower().Contains("chatbot") ||
-                         name.ToLower().Contains("chat");
+                     name.ToLower().Contains("chat");
 
             // BOT STYLE
             if (isBot)
@@ -479,7 +850,6 @@ namespace CYBER_WATCH_AI_POE_PART_2
             chats.ScrollIntoView(chats.Items[chats.Items.Count - 1]);
         }
 
+    }
 
-
-    }//end of class
 }//end of namespace
