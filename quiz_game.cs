@@ -3,21 +3,17 @@ using System.Collections.Generic;
 
 namespace CYBER_WATCH_AI_POE_PART_2
 {
-    //this class manages the whole quiz: the questions, the score, and which question we are on
     public class quiz_game
-    {//start of class
-
-        // Populates the provided questions list with predefined quiz questions and answers
+    {
         public void autoLoadQuiz(ref List<quiz_question> questions)
         {
-            // Initialize the list with a set of cybersecurity-related questions
             questions = new List<quiz_question>()
             {
                 new quiz_question
                 {
-                    Text = "What is phishing?",  // Question text
-                    correctAnswer = "Tricking to steal data",  // Correct answer
-                    wrongAnswer = new List<string>{ "Data backup", "Safe login", "Password tips" }  // Distractors
+                    Text = "What is phishing?",
+                    correctAnswer = "Tricking to steal data",
+                    wrongAnswer = new List<string>{ "Data backup", "Safe login", "Password tips" }
                 },
                 new quiz_question
                 {
@@ -72,9 +68,8 @@ namespace CYBER_WATCH_AI_POE_PART_2
                     Text = "Flagged site action?",
                     correctAnswer = "Leave right away",
                     wrongAnswer = new List<string>{ "Ignore it", "Refresh page", "Click through" }
-                },
+                }
             };
         }
-
-    }//end of class
+    }
 }

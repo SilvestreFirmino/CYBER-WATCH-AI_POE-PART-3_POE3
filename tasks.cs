@@ -1,22 +1,17 @@
-﻿using MySql.Data.MySqlClient;
-using System;
-using System.Collections.Generic;
+﻿using System;
+using System.Data;
 using System.Data.SqlClient;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace CYBER_WATCH_AI_POE_PART_2
-{//start of namespace
-
+{
     public class tasks
-    {//start of the class
+    {
+        // Global connection string mapped to LocalDB master or custom db instancing
+        private readonly string connection = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=master;Integrated Security=True";
 
-        //global connection string , with variable declaration
-        string connection = @"Data source=(localdb)\MSSQLLocalDB;Database=master";
-
-
-
-        // AUTO CREATE TABLE METHOD
+        // Auto creates the table structure safely on startup if it doesn't exist
         public void CreateTableIfNotExists()
         {
             using (SqlConnection connect = new SqlConnection(connection))
@@ -24,8 +19,6 @@ namespace CYBER_WATCH_AI_POE_PART_2
                 try
                 {
                     connect.Open();
-
-                    // Check if table exists and create if not
                     string createTableQuery = @"
                         IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='demo_tasks' AND xtype='U')
                         BEGIN
@@ -33,220 +26,140 @@ namespace CYBER_WATCH_AI_POE_PART_2
                                 task_id INT IDENTITY(1,1) PRIMARY KEY,
                                 task_name NVARCHAR(100) NOT NULL,
                                 task_description NVARCHAR(255),
-                                task_dueDate NVARCHAR(50),
+                                task_due_date NVARCHAR(50),
                                 task_status NVARCHAR(20)
                             )
                         END";
 
-                    SqlCommand createCommand = new SqlCommand(createTableQuery, connect);
-                    createCommand.ExecuteNonQuery();
-
-                    connect.Close();
+                    using (SqlCommand createCommand = new SqlCommand(createTableQuery, connect))
+                    {
+                        createCommand.ExecuteNonQuery();
+                    }
                 }
                 catch (Exception error)
                 {
-                    MessageBox.Show("Error creating table: " + error.Message);
+                    MessageBox.Show("Error creating table: " + error.Message, "Database Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
-        //creating method to test the connection
+        // Test the database availability
         public void test_connection()
-        {//start of test connection method
-
-            /*
-             * SqlConnection -used to make conneciton with Database
-             * SqlCommand - used to run queries , all of them
-             * SqlDataReader -Used to read what is collected by
-             *                 the SqlCommand , and show the user data
-             */
-
-
-            //connect to the database
-            SqlConnection connect = new SqlConnection(connection);
-
-            //try and catch any error that it will throw
-            try
+        {
+            using (SqlConnection connect = new SqlConnection(connection))
             {
-                //Open the connection and close the connection
-                connect.Open();
-                //put the database query and run it
-                MessageBox.Show("connected..");
-                //then close it after you are done
-                connect.Close();
-
+                try
+                {
+                    connect.Open();
+                    MessageBox.Show("Database Connection Successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception error)
+                {
+                    MessageBox.Show("Connection Failed: " + error.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
-            catch (Exception error)
-            {
-                //show message error
-                MessageBox.Show(error.Message);
-            }
+        }
 
-        }//end of conneciton method
-
-
-
-
-
-
-        //method to insert or store the tasks 
+        // Safe Insert: Fixed vulnerability by implementing Parameterized SQL Commands
         public void insert_task(string name, string description, string dueDate, string status)
-        {//start of insert method
-
-            //create the connection instance
-            // SqlConnection connects = new SqlConnection(connection);
-
-            //you must use try and catch 
-
-            //make sure the using is covered by the try and catch
+        {
             using (SqlConnection connects = new SqlConnection(connection))
-            {//start of using
+            {
+                try
+                {
+                    connects.Open();
+                    string query = "INSERT INTO demo_tasks (task_name, task_description, task_due_date, task_status) VALUES (@name, @desc, @due, @status);";
 
+                    using (SqlCommand run_query = new SqlCommand(query, connects))
+                    {
+                        run_query.Parameters.AddWithValue("@name", name);
+                        run_query.Parameters.AddWithValue("@desc", description);
+                        run_query.Parameters.AddWithValue("@due", dueDate);
+                        run_query.Parameters.AddWithValue("@status", status);
 
-                //open the connection
-                connects.Open();
+                        run_query.ExecuteNonQuery();
+                    }
+                }
+                catch (Exception error)
+                {
+                    MessageBox.Show("Insert failed: " + error.Message);
+                }
+            }
+        }
 
-
-                //do the query
-                string query = $"insert into demo_tasks values('{name}','{description}','{dueDate}','{status}');";
-
-                //then use the SqlCOmmand to run the query
-                SqlCommand run_query = new SqlCommand(query, connects);
-                //then run the query as a nonExecuteQuery()
-                run_query.ExecuteNonQuery();
-
-
-                connects.Close();
-
-
-            }//end of using
-
-
-        }//end of insert method
-
-
-
-        //method to auto load all the user's tasks
+        // Load Tasks directly into WPF ListView UI element
         public void load_tasks(ListView view_task)
-        {//start of the load task method
+        {
+            view_task.Items.Clear(); // Clear old items
 
+            using (SqlConnection connects = new SqlConnection(connection))
+            {
+                try
+                {
+                    connects.Open();
+                    string query = "SELECT * FROM demo_tasks;";
 
-            /*
- * SqlConnection -used to make conneciton with Database
- * SqlCommand - used to run queries , all of them
- * SqlDataReader -Used to read what is collected by
- *                 the SqlCommand , and show the user data
- */
+                    using (SqlCommand run_query = new SqlCommand(query, connects))
+                    using (SqlDataReader data_collect = run_query.ExecuteReader())
+                    {
+                        bool data_found = false;
 
-            //create an instance for the connection
-            SqlConnection connects = new SqlConnection(connection);
+                        while (data_collect.Read())
+                        {
+                            data_found = true;
+                            string task_id = data_collect["task_id"].ToString();
+                            string task_name = data_collect["task_name"].ToString();
+                            string task_description = data_collect["task_description"].ToString();
+                            // Fixed Typo alignment to match 'task_due_date' columns in schema
+                            string task_dueDate = data_collect["task_due_date"].ToString();
+                            string task_status = data_collect["task_status"].ToString();
 
-            //open connection
-            connects.Open();
+                            view_task.Items.Add($"{task_id} | {task_name} - {task_description} (Due: {task_dueDate}) [{task_status}]");
+                        }
 
-            //temp variable , to hold the query
-            string query = $"select * from demo_tasks;";
+                        if (!data_found)
+                        {
+                            view_task.Items.Add("No active tasks found.");
+                        }
+                    }
+                }
+                catch (Exception error)
+                {
+                    view_task.Items.Add("Error loading tasks: " + error.Message);
+                }
+            }
+        }
 
-            //use sqlCommand to run this query
-            SqlCommand run_query = new SqlCommand(query, connects);
-
-            //reading what the command found and show/display , using SqlDataReader
-            SqlDataReader data_collect = run_query.ExecuteReader();
-            //temp variable for boolean, to get the status of data found or not found , Not found mean false but if Found then it is true
-            bool data_found = false;
-
-
-            //use the while Loop to get all the columns
-            while (data_collect.Read())
-            {//start while loop
-
-                //data found must be true
-                data_found = true;
-
-
-                //getting all the columns by their names
-                string task_id = data_collect["task_id"].ToString();
-                string task_name = data_collect["task_name"].ToString();
-                string task_description = data_collect["task_description"].ToString();
-                string task_dueDate = data_collect["task_dueDate"].ToString();
-                string task_status = data_collect["task_status"].ToString();
-
-                //add the found tasks to the ListView
-                view_task.Items.Add(task_id + " " + task_name + " with " + task_description + " due on " + task_dueDate + " and is " + task_status);
-
-            }//end of while loop
-
-
-            //display error message
-            if (!data_found)
-            {//start of if
-                //display the message in a listView
-                view_task.Items.Add("No task found");
-            }//end of if
-
-            //close the connection
-            connects.Close();
-
-
-
-
-        }//end of the load task method
-
-        //method to update tasks
+        // Update task status flag safely
         public void update_taskStatus(int id)
-        {//start of update_taskStatus method
+        {
+            using (SqlConnection connects = new SqlConnection(connection))
+            {
+                connects.Open();
+                string query = "UPDATE demo_tasks SET task_status = 'done' WHERE task_id = @id";
 
-            //create connection
-            SqlConnection connects = new SqlConnection(connection);
+                using (SqlCommand run_query = new SqlCommand(query, connects))
+                {
+                    run_query.Parameters.AddWithValue("@id", id);
+                    run_query.ExecuteNonQuery();
+                }
+            }
+        }
 
-            //then open the connection
-            connects.Open();
-
-            //then use SqlCommand to run the query
-            //temp variable to hold the query
-            string query = $"update demo_tasks set task_status='done' where task_id={id}";
-
-            //then run the query
-            SqlCommand run_query = new SqlCommand(query, connects);
-            run_query.ExecuteNonQuery();
-
-
-
-            //and close the conneciton once done
-            connects.Close();
-
-        }//end of update_taskStatus method
-
-
-
-        //method to delete tasks
+        // Delete item record from system
         public void delete_task(int id)
-        {//start of delete_task method
+        {
+            using (SqlConnection connects = new SqlConnection(connection))
+            {
+                connects.Open();
+                string query = "DELETE FROM demo_tasks WHERE task_id = @id";
 
-
-            //connect
-            SqlConnection connects = new SqlConnection(connection);
-
-            //then open the connection
-            connects.Open();
-
-            //temp variable to hold the query
-            string query = $"delete from demo_tasks where task_id={id}";
-
-            //run the query 
-            SqlCommand run_query = new SqlCommand(query, connects);
-
-            //run
-            run_query.ExecuteNonQuery();
-
-
-            //close the connection after using it
-            connects.Close();
-
-
-
-        }//end of delete_task method
-
-
-    }//end of class
-}//end of namespace
+                using (SqlCommand run_query = new SqlCommand(query, connects))
+                {
+                    run_query.Parameters.AddWithValue("@id", id);
+                    run_query.ExecuteNonQuery();
+                }
+            }
+        }
+    }
+}
