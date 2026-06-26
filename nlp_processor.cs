@@ -58,6 +58,8 @@ namespace CYBER_WATCH_AI_POE_PART_2
             model = pipeline.Fit(dataView);
             mlContext.Model.Save(model, dataView.Schema, "nlp_model.zip");
             predictionEngine = mlContext.Model.CreatePredictionEngine<TrainingData, AnswerPrediction>(model);
+
+
         }
 
         public void LoadModel()

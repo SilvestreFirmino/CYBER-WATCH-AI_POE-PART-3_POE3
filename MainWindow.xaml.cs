@@ -39,9 +39,20 @@ namespace CYBER_WATCH_AI_POE_PART_2
         //create an instance for the class tasks
         //with an object name manage_tasks
         tasks manage_tasks = new tasks();
+        activity_log my_log = new activity_log();
+       
+        // Call this method whenever you navigate to the Log Page or want to refresh it
         //global variable to hold the task details
         string task_name, task_description, task_dueDate, task_status = string.Empty;
 
+    
+            public void RefreshLogUI()
+        {
+            // Clear the old binding and load the fresh list of entries
+            log_append.ItemsSource = null;
+            log_append.ItemsSource = my_log.get_all_entries();
+        }// Refresh the list view so the user sees the change instantly
+        
 
 
 
@@ -73,6 +84,15 @@ namespace CYBER_WATCH_AI_POE_PART_2
         public MainWindow()
         {
             InitializeComponent();
+
+            // Add an initial log entry when the app opens
+            my_log.add_entry("System", "Cyber Watch AI initialized successfully.");
+
+            // Show it on the UI
+            RefreshLogUI();
+
+            my_log.add_entry(username, "User asked a question.");
+            RefreshLogUI();
 
 
             //store answers 
@@ -146,6 +166,7 @@ namespace CYBER_WATCH_AI_POE_PART_2
         }
 
         // Switch to the Activity Log page
+        // Switch to the Activity Log page
         private void activity(object sender, RoutedEventArgs e)
         {
             // Show log page and hide all others
@@ -155,8 +176,16 @@ namespace CYBER_WATCH_AI_POE_PART_2
             LogPage.Visibility = Visibility.Visible;
             gamePage.Visibility = Visibility.Hidden;
 
-            // Scroll to the latest activity log entry
+            // ─── AUTOMATION ADDITION ───────────────────────────────────
+            // Refresh the UI here so the latest items show up immediately
+            RefreshLogUI();
 
+            // Optional: Auto-scroll to the last element in the log window if log_append has elements
+            if (log_append.Items.Count > 0)
+            {
+                log_append.ScrollIntoView(log_append.Items[log_append.Items.Count - 1]);
+            }
+            // ───────────────────────────────────────────────────────────
         }
 
         // Switch to the Game page
@@ -168,6 +197,10 @@ namespace CYBER_WATCH_AI_POE_PART_2
             reminderPage.Visibility = Visibility.Hidden;
             LogPage.Visibility = Visibility.Hidden;
             gamePage.Visibility = Visibility.Visible;
+
+            string currentUsr = string.IsNullOrWhiteSpace(username) ? "Guest" : username;
+            my_log.add_entry(currentUsr, "Navigated to the Game page.");
+            RefreshLogUI();
         }
 
         // Exit the application
@@ -278,7 +311,9 @@ namespace CYBER_WATCH_AI_POE_PART_2
             clickButton.Background = System.Windows.Media.Brushes.Green;
             selectedAnswer = clickButton.Content.ToString();
 
-
+            string currentUsr = string.IsNullOrWhiteSpace(username) ? "Guest" : username;
+            my_log.add_entry(currentUsr, $"Selected quiz option: \"{selectedAnswer}\"");
+            RefreshLogUI();
 
         }
 
@@ -352,6 +387,10 @@ namespace CYBER_WATCH_AI_POE_PART_2
             //Hide username page grid and set chats grid visible
             username_grid.Visibility = Visibility.Hidden;
             MainPage.Visibility = Visibility.Visible;
+
+            string finalizedName = string.IsNullOrWhiteSpace(username) ? "Guest" : username;
+            my_log.add_entry("System", $"User signed in as: {finalizedName}");
+            RefreshLogUI();
         }
 
 
@@ -361,43 +400,31 @@ namespace CYBER_WATCH_AI_POE_PART_2
         // Handles double-clicking on an item in the reminder list
         private void remind_append_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-
-
-
-
-            //get the selected value
             string get_selected_value = view_tasks.SelectedValue.ToString();
-
-            //get the id using sub string , from 0 to 1
             string get_id = get_selected_value.Substring(0, 1);
-            //then cast the string get_id to an int
             int id = int.Parse(get_id);
 
-            //check if the selected task end with "done", then delete if ends with done
+            string currentUsr = string.IsNullOrWhiteSpace(username) ? "Guest" : username;
+
             if (get_selected_value.ToLower().EndsWith("done"))
-            {//start of if
-
-
-                //if done then delete the task
+            {
                 manage_tasks.delete_task(id);
 
-
-            }//end of if
+                // ─── AUTOMATION ADDITION ───────────────────────────────────
+                my_log.add_entry(currentUsr, $"Deleted completed Task ID: {id}");
+                // ───────────────────────────────────────────────────────────
+            }
             else
-            {//start of else
-             //mark it dobe since it is ending with pending not "DONE"
+            {
                 manage_tasks.update_taskStatus(id);
 
+                // ─── AUTOMATION ADDITION ───────────────────────────────────
+                my_log.add_entry(currentUsr, $"Marked Task ID: {id} as DONE");
+                // ───────────────────────────────────────────────────────────
+            }
 
-                // MessageBox.Show(""+  id);
-
-            }//end of else
-
-
-
-            //recall the auto load method
+            RefreshLogUI();
             autoLoad_task();
-
         }
 
 
@@ -419,6 +446,7 @@ namespace CYBER_WATCH_AI_POE_PART_2
 
 
         //send event handler
+        
         private void send(object sender, RoutedEventArgs e)
         {
             // Get the question from the design 
@@ -436,6 +464,12 @@ namespace CYBER_WATCH_AI_POE_PART_2
             // Show what the user typed 
             error_method(username, rawQuestion);
 
+            // ─── AUTOMATION ADDITION ───────────────────────────────────
+            // Automatically log that the user sent a chat message
+            string currentUsr = string.IsNullOrWhiteSpace(username) ? "Guest" : username;
+            my_log.add_entry(currentUsr, $"Asked: \"{rawQuestion}\"");
+            RefreshLogUI();
+            // ───────────────────────────────────────────────────────────
 
             //ai chats and auto_show_interest
             auto_show_interest();
@@ -492,7 +526,7 @@ namespace CYBER_WATCH_AI_POE_PART_2
 
                 //then filter to get task name
                 task_name = questions.Replace("add task", "");
-
+                my_log.add_entry(username, "Task added: '" + task_name + "'");
 
 
             }//end of if checking task add or add task
@@ -526,7 +560,7 @@ namespace CYBER_WATCH_AI_POE_PART_2
                 //call the insert method to store the task
                 error_method("ChatBot: ", "good , i will remind you in " + days + " days, on the " + format_date + "\n, to view your task click on view tasks");
                 manage_tasks.insert_task(task_name, task_description, task_dueDate, task_status);
-
+                my_log.add_entry(username, "Reminder set for '" + task_name + "' on " + format_date);
                 return;
 
             }//end of the reminder if
